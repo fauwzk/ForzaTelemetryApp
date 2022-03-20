@@ -1,13 +1,18 @@
 import struct
 import socket
-UDP_IP = "192.168.137.84" #This sets server ip to the RPi ip
-UDP_PORT = 5300 #You can freely edit this
 
-#setting up an udp server
-sock = socket.socket(socket.AF_INET, # Internet
+def set_server(ip, port):
+    UDP_IP = str(ip) #This sets server ip to the RPi ip
+    UDP_PORT = int(port) #You can freely edit this
+    #setting up an udp server
+    global sock
+    sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
+    sock.bind((UDP_IP, UDP_PORT))
 
-sock.bind((UDP_IP, UDP_PORT))
+
+
+
 
 #reading data and assigning names to data types in data_types dict
 data_types = {}
