@@ -58,7 +58,7 @@ def graph():
 	print(x)
 	print(y)
 	z = [0]
-	plt.plot(x, y, z)
+	plt.plot(x, y)
 	# naming the x axis
 	plt.xlabel('x - axis')
 	# naming the y axis

@@ -57,5 +57,3 @@ def get_data(data):
         passed_data = passed_data[jump:]
     #returns the dict
     return return_dict
-    
-
