@@ -1,12 +1,13 @@
-import socket
 import struct
+import socket
+UDP_IP = "192.168.137.84" #This sets server ip to the RPi ip
+UDP_PORT = 5300 #You can freely edit this
 
+#setting up an udp server
+sock = socket.socket(socket.AF_INET, # Internet
+                     socket.SOCK_DGRAM) # UDP
 
-
-UDP_IP = "0.0.0.0" #This sets server ip to the RPi ip
-UDP_PORT = 5005 #You can freely edit this
-
-
+sock.bind((UDP_IP, UDP_PORT))
 
 #reading data and assigning names to data types in data_types dict
 data_types = {}
@@ -27,12 +28,10 @@ jumps={
     'hzn': 12 #Unknown, 12 bytes of.. something
 }
 
-
+return_dict = {}
 
 
 def get_data(data):
-    return_dict={}
-
     #additional var
     passed_data = data
     
@@ -62,28 +61,8 @@ def get_data(data):
         
         #removes already read bytes from the variable
         passed_data = passed_data[jump:]
-    
-    
-    
     #returns the dict
     return return_dict
 
-
-#setting up an udp server
-sock = socket.socket(socket.AF_INET, # Internet
-                     socket.SOCK_DGRAM) # UDP
-
-sock.bind((UDP_IP, UDP_PORT))
-
-
-
-while True:
-    data, addr = sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
-
-    #received data is now in the retuturned_data dict, key names are in data_format.txt
-    returned_data = get_data(data)
-    
-
-    print(returned_data['Speed'])
     
 
