@@ -7,8 +7,7 @@ def set_server(ip, port):
     print(UDP_IP, UDP_PORT, "susuuu")
     #setting up an udp server
     global sock
-    sock = socket.socket(socket.AF_INET, # Internet
-                    socket.SOCK_DGRAM) # UDP
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(5)
     sock.bind((UDP_IP, UDP_PORT))
 
