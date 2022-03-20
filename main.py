@@ -6,7 +6,10 @@ dpg.create_context()
 with dpg.value_registry():
     dpg.add_string_value(default_value="127.0.0.1", tag="ip_address")
     dpg.add_string_value(default_value="5300", tag="port")
-
+    dpg.add_string_value(tag="rpm")
+    dpg.add_string_value(tag="power")
+    dpg.add_string_value(tag="torque")
+    dpg.add_string_value(tag="boost")
 dpg.create_viewport(title='ForzaTelemetryApp', width=600, height=300)
 
 def connect():
@@ -23,7 +26,11 @@ def run():
         power = round((returned_data['Power']*1.34102)/1000)
         torque = round(returned_data['Torque'], 1) 
         boost = round(returned_data['Boost']/14.504, 2)
-        print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
+        dpg.set_value("rpm", rpm)
+        dpg.set_value("power", power)
+        dpg.set_value("torque", torque)
+        dpg.set_value("boost", boost)
+        #print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
 
 with dpg.window(label="Connect"):
     dpg.add_button(label="Connect", callback=connect)
@@ -32,6 +39,10 @@ with dpg.window(label="Connect"):
 
 with dpg.window(label="Stats"):
     dpg.add_button(label="run", callback=run)
+    dpg.add_text(source="rpm")
+    dpg.add_text(source="power")
+    dpg.add_text(source="torque")
+    dpg.add_text(source="boost")
 
 dpg.setup_dearpygui()
 dpg.show_viewport()
