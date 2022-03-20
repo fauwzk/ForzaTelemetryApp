@@ -1,5 +1,4 @@
 import data_gen
-import graph
 import dearpygui.dearpygui as dpg
 import dearpygui.demo as demo
 import matplotlib.pyplot as plt
