@@ -8,8 +8,8 @@ def set_server(ip, port):
     global sock
     sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM) # UDP
+    sock.settimeout(5)
     sock.bind((UDP_IP, UDP_PORT))
-
 
 
 
