@@ -4,6 +4,7 @@ import socket
 def set_server(ip, port):
     UDP_IP = str(ip) #This sets server ip to the RPi ip
     UDP_PORT = int(port) #You can freely edit this
+    print(UDP_IP, UDP_PORT, "susuuu")
     #setting up an udp server
     global sock
     sock = socket.socket(socket.AF_INET, # Internet
