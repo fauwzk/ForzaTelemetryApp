@@ -4,14 +4,13 @@ import socket
 def set_server(ip, port):
     UDP_IP = str(ip) #This sets server ip to the RPi ip
     UDP_PORT = int(port) #You can freely edit this
-    print(UDP_IP, UDP_PORT, "susuuu")
     #setting up an udp server
     global sock
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(5)
     sock.bind((UDP_IP, UDP_PORT))
 
-#reading data and assigning names to data types in data_types dict
+#reading data and assigning names to ata types in data_types dict
 data_types = {}
 with open('data_format.txt', 'r') as f:
     lines = f.read().split('\n')
