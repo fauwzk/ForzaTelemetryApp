@@ -38,11 +38,13 @@ def graph():
 	global x
 	global y
 	global z
+	global az
 	x = []
 	y = []
 	z = []
+	az = []
 	dpg.set_value("graph_status", "Running")
-	gear_setting = int(dpg.get_value("gearbox")) - 1
+	gear_setting = int(dpg.get_value("gearbox")) 
 	dpg.set_value("gear_setting", str(gear_setting))
 	try:
 		data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
@@ -54,32 +56,47 @@ def graph():
 			rpm = round(returned_data['CurrentEngineRpm'])
 			power = round((returned_data['Power']*1.34102)/1000)
 			torque = round(returned_data['Torque'], 1) 
-			#print(gear_setting, gear)
-			if gear_setting < gear:
+			boost = round((returned_data['Boost']*10))
+			print(gear, gear_setting)
+			if gear_setting == gear:
 				break
 			else:
 				if power > 0:
 					if y:
 						power_high = y[-1]
 						if power > int(power_high):
-							x.append(rpm)
-							y.append(power)
-							z.append(torque)
+						#if power:
+							torque_high = z[-1]
+							if torque > int(torque_high):
+							#if torque:
+								rpm_high = x[-1]
+								#if rpm > int(rpm_high):
+								if rpm > int(rpm_high):
+									x.append(rpm)
+									y.append(power)
+									z.append(torque)
+									az.append(boost)
+								else:
+									continue
+							else:
+								continue
 						else:
 							continue
 					else:
 						x.append(rpm)
 						y.append(power)
 						z.append(torque)
+						az.append(boost)
 				else:
-					continue			
+					continue
 		dpg.set_value("graph_status", "Graphing")
 		fig, ax = plt.subplots(figsize=(6, 6))
 		ax.plot(x, y, label="Power HP")
 		ax.plot(x, z, label="Torque N.m")
+		ax.plot(x, az, label="boost bar*10")
 		ax.legend()
-		plt.show()
 		dpg.set_value("graph_status", "Finished")
+		plt.show()
 	except:
 		dpg.set_value("graph_status", "Error")
 
@@ -107,7 +124,6 @@ def run():
 			#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
 		except:
 			dpg.set_value("run_status", "Error")
-
 
 with dpg.window(label="Stats"):
 	dpg.add_button(label="run", callback=run)
