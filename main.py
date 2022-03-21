@@ -4,7 +4,6 @@ import dearpygui.demo as demo
 import matplotlib.pyplot as plt
 import time
 
-
 dpg.create_context()
 
 with dpg.value_registry():
