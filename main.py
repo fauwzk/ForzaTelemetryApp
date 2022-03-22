@@ -89,28 +89,24 @@ def graph():
 				break
 			else:
 				if power > 0:
-					if power:
-						power_high = power_axis[-1]
+					rpm_high = rpm_axis[-1]
+					if rpm > int(rpm_high):
 						if power:
 							torque_high = torque_axis[-1]
 							if torque:
-								rpm_high = rpm_axis[-1]
-								if rpm > int(rpm_high):
-									rpm_axis.append(rpm)
-									power_axis.append(power)
-									torque_axis.append(torque)
-									boost_axis.append(boost*10)
-								else:
-									continue
+								rpm_axis.append(rpm)
+								power_axis.append(power)
+								torque_axis.append(torque)
+								boost_axis.append(boost*10)
 							else:
 								continue
 						else:
-							continue
+							rpm_axis.append(rpm)
+							power_axis.append(power)
+							torque_axis.append(torque)
+							boost_axis.append(boost*10)
 					else:
-						rpm_axis.append(rpm)
-						power_axis.append(power)
-						torque_axis.append(torque)
-						boost_axis.append(boost*10)
+						continue
 				else:
 					continue
 		#print(rpm_axis)
