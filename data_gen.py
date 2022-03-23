@@ -40,7 +40,7 @@ def get_data(data):
         decoded = 0
         #complicated decoding for each type of data
         if d_type == 's32':
-            decoded = int.from_bytes(current, byteorder='little', signed = True)
+            decoded = int.from_bytes(current, byteorder='little', signed=True)
         elif d_type == 'u32':
             decoded = int.from_bytes(current, byteorder='little', signed=False)
         elif d_type == 'f32':

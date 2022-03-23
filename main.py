@@ -31,8 +31,9 @@ def connect():
 		dpg.set_value("connect_status", "Connected")
 		dpg.set_value("graph_status", "Not Running")
 		dpg.set_value("run_status", "Not Running")
-	except:
-		dpg.set_value("connect_status", "Error")
+	except Exception as e:
+		print(e)
+		dpg.set_value("connect_status", f"Error :\n{e}")
 
 def graph():
 	global rpm_axis
@@ -58,6 +59,16 @@ def graph():
 			torque = round(returned_data['Torque'], 1) 
 			boost = round((returned_data["Boost"] / 14.504), 2)
 			print(gear, gear_setting)
+			dpg.set_value("gear", gear)
+			dpg.set_value("rpm", rpm)
+			dpg.set_value("boost", boost)
+			if power > 0:
+				dpg.set_value("power", power)
+				dpg.set_value("torque", torque)
+			else:
+				dpg.set_value("power", 0)
+				dpg.set_value("torque", 0)
+				continue
 			if gear_setting == gear:
 				break
 			else:
@@ -106,15 +117,17 @@ def graph():
 		fig, ax = plt.subplots(figsize=(6, 6))
 		ax.plot(rpm_axis, power_axis, label=f"Power HP\n{peak_hp}HP@{peak_hp_rpm}RPM")
 		ax.plot(rpm_axis, torque_axis, label=f"Torque N.m\n{peak_torque}N.m@{peak_torque_rpm}RPM")
-		ax.plot(rpm_axis, boost_axis, label=f"boost bar*10\n{peak_boost}(bar*10)@{peak_boost_rpm}RPM")
+		if peak_boost != 0:
+			ax.plot(rpm_axis, boost_axis, label=f"boost bar*10\n{round(peak_boost/10, 2)}bar@{peak_boost_rpm}RPM")
+			ax.plot(peak_boost_rpm, peak_boost, marker="X", markersize=7, markerfacecolor="green")
 		ax.plot(peak_hp_rpm, peak_hp, marker="X", markersize=7, markerfacecolor="green")      
 		ax.plot(peak_torque_rpm, peak_torque, marker="X", markersize=7, markerfacecolor="green")
-		ax.plot(peak_boost_rpm, peak_boost, marker="X", markersize=7, markerfacecolor="green")
 		ax.legend()
 		dpg.set_value("graph_status", "Finished")
 		plt.show()
-	except:
-		dpg.set_value("graph_status", "Error")
+	except Exception as e:
+		print(e)
+		dpg.set_value("graph_status", f"Error :\n{e}")
 
 def run():
 	dpg.set_value("run_status", "Running")
@@ -138,8 +151,10 @@ def run():
 				dpg.set_value("torque", 0)
 				continue		
 			#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
-		except:
-			dpg.set_value("run_status", "Error")
+		except Exception as e:
+			print(e)
+			dpg.set_value("run_status", f"Error :\n{e}")
+			break
 
 with dpg.window(label="Main", autosize=True, pos=(10, 10)):
 	dpg.add_input_text(label="IP", source="ip_address")
@@ -156,7 +171,6 @@ with dpg.window(label="Stats", autosize=True, pos=(10, 175)):
 
 with dpg.window(label="Graph", autosize=True, pos=(125, 175)):
 	dpg.add_slider_int(label="Gearbox", min_value=1, max_value=10, source="gearbox", width=50)
-	dpg.add_text(source="gear_setting")
 	dpg.add_button(label="graph", callback=graph)
 
 with dpg.window(label="Status", autosize=True, pos=(400, 175)):
