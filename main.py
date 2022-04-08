@@ -9,7 +9,6 @@ import traceback
 import json
 from datetime import datetime
 import os
-from scalene import scalene_profiler
 import rich
 import warnings
 
