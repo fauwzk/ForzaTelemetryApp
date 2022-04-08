@@ -1,5 +1,7 @@
 import struct
 import socket
+import sys
+import os
 
 def set_server(ip, port):
     UDP_IP = str(ip) #This sets server ip to the RPi ip
@@ -10,9 +12,16 @@ def set_server(ip, port):
     sock.settimeout(5)
     sock.bind((UDP_IP, UDP_PORT))
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 #reading data and assigning names to ata types in data_types dict
 data_types = {}
-with open('data_format.txt', 'r') as f:
+with open(resource_path('data_format.txt'), 'r') as f:
     lines = f.read().split('\n')
     for line in lines:
         data_types[line.split()[1]] = line.split()[0]
