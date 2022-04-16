@@ -41,11 +41,11 @@ with dpg.value_registry():
 	dpg.add_string_value(default_value="Not connected", tag="ping")
 	dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
+font_path = data_gen.resource_path('font.ttf')
 with dpg.font_registry():
-	default_font = dpg.add_font("font.ttf", 65)
+	default_font = dpg.add_font(font_path, 65)
 
 def connect():
-	global connection_status
 	ip = dpg.get_value("ip_address")
 	port = dpg.get_value("port")
 	try:
@@ -54,7 +54,6 @@ def connect():
 		data_gen.set_server(ip, port)
 		data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
 		returned_data = data_gen.get_data(data)
-
 		dpg.set_value("status", "Connected")
 		#dpg.configure_item("status_window", show=False)
 		dpg.set_value("run_status", "Not Running")
@@ -224,6 +223,7 @@ def make_graph(rpm_axis, power_axis, torque_axis, boost_axis):
 	del boost_axis[:]
 
 def get_telemetry():
+	global connection_status
 	if connection_status == 1:
 		try:
 			data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
