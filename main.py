@@ -15,12 +15,11 @@ warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of 
 
 dpg.create_context()
 
-connection_status = 0
-
-global home_path
-
+init_file = "fta.ini"
 home_path = os.path.expanduser('~')
-gear_setting_default = 6
+
+connection_status = 0
+gear_setting_default = 4
 
 with dpg.value_registry():
 	dpg.add_string_value(default_value="192.168.1.8", tag="ip_address")
@@ -35,28 +34,37 @@ with dpg.value_registry():
 	dpg.add_string_value(default_value="Not connected", tag="save_status")
 	dpg.add_string_value(default_value=gear_setting_default, tag="gear_setting")
 	dpg.add_string_value(default_value="Not connected", tag="error")
+	dpg.add_string_value(default_value="Not connected", tag="ping")
 	dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
 def connect():
 	ip = dpg.get_value("ip_address")
 	port = dpg.get_value("port")
-	#print(ip, port)
 	try:
-		dpg.set_value("connect_status", f"Connecting to {ip}:{port}")
-		dpg.configure_item("connection_window", show=True)
+		dpg.set_value("error", f"Connecting to {ip}:{port}")
+		dpg.configure_item("errors_window", show=True)
 		data_gen.set_server(ip, port)
 		data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
 		returned_data = data_gen.get_data(data)
-		dpg.set_value("connect_status", "Connected")
-		dpg.configure_item("connection_window", show=False)
+		dpg.set_value("error", "Connected")
+		dpg.configure_item("errors_window", show=False)
 		dpg.set_value("run_status", "Not Running")
 		connection_status = 1
+		ping = round((ping3.ping(ip)*1000), 1)
+		ping = f"{ping}.ms"
+		dpg.set_value("ping", ping)
+		dpg.set_value("run_status", "Not Running")
 	except Exception as e:
 		print(e)
 		connection_status = 0
-		dpg.set_value("connect_status", f"Error:\n{e}")
-		time.sleep(5)
-		dpg.configure_item("connection_window", show=False)
+		dpg.set_value("error", f"Error:\n{e}")
+		dpg.configure_item("errors_window", show=True)
+
+def save_init_file():
+	dpg.save_init_file(init_file)
+	dpg.configure_item("save_window", show=False)
+	dpg.set_value("save_status", f"Saved:\n{init_file}")
+	dpg.configure_item("save_window", show=True)
 
 def graph():
 	if connection_status != 0:
@@ -215,9 +223,8 @@ def make_graph(rpm_axis, power_axis, torque_axis, boost_axis):
 	del torque_axis[:]
 	del boost_axis[:]
 
-def run():
+def get_telemetry():
 	if connection_status != 0:
-		#dpg.set_value("run_status", "Running")
 		while True:
 			try:
 				data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
@@ -250,12 +257,15 @@ with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_valu
 	dpg.add_file_extension(".json", color=(255, 0, 255, 255), custom_text="[JSON]")
 
 with dpg.window(label="Main", autosize=True, pos=(10, 30)):
-	dpg.add_input_text(label="IP", source="ip_address")
-	dpg.add_input_text(label="PORT", source="port")
+	dpg.add_input_text(label="IP", source="ip_address", width=125)
+	dpg.add_input_text(label="PORT", source="port", width=125)
 	dpg.add_button(label="Connect", callback=connect)
+	dpg.add_separator()
+	dpg.add_text(default_value="Ping:")
+	dpg.add_text(source="ping")
 
-with dpg.window(label="Stats", autosize=True, pos=(10, 175)):
-	dpg.add_button(label="run", callback=run)
+with dpg.window(label="Car Telemetry", autosize=True, pos=(10, 175)):
+	dpg.add_button(label="Start", callback=get_telemetry)
 	dpg.add_text(source="gear")
 	dpg.add_text(source="rpm")
 	dpg.add_text(source="power")
@@ -264,29 +274,32 @@ with dpg.window(label="Stats", autosize=True, pos=(10, 175)):
 
 with dpg.window(label="Graph", autosize=True, pos=(125, 175)):
 	dpg.add_slider_int(label="Gearbox", min_value=2, max_value=10, source="gearbox", width=62)
-	dpg.add_button(label="graph", callback=graph)
-	dpg.add_text(default_value="Status :")
-	dpg.add_text(source="run_status")
-
-with dpg.window(label="Connection Status", autosize=True, modal=True, show=False, id="connection_window", no_title_bar=True):
-	dpg.add_text(source="connect_status")
-	#dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("connection_window", show=False))
+	dpg.add_button(label="Start", callback=graph)
 
 with dpg.window(label="Errors", autosize=True, modal=True, show=False, id="errors_window", no_title_bar=True):
 	dpg.add_text(default_value="Error:")
 	dpg.add_text(source="error")
 	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("errors_window", show=False))
 
+with dpg.window(label="Status", autosize=True):
+	dpg.add_text(default_value="Status :")
+	dpg.add_text(source="run_status")
+
 with dpg.viewport_menu_bar():
 	with dpg.menu(label="Logs"):
 		dpg.add_menu_item(label="Open", callback=lambda: dpg.show_item("open_values_file_picker"))
 		dpg.add_menu_item(label="Save", callback=save_values)
+	with dpg.menu(label="Config"):
+		dpg.add_menu_item(label="Save", callback=save_init_file)
+	with dpg.menu(label="Debug"):
+		dpg.add_menu_item(label="Metrics", callback=lambda: dpg.show_metrics())
 
 with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="save_window", no_title_bar=True):
 	dpg.add_text(source="save_status")
 	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("save_window", show=False))
 
-dpg.create_viewport(title='ForzaTelemetryApp', width=500, height=500)
+dpg.configure_app(init_file=init_file)  # default file is 'fta.ini'
+dpg.create_viewport(title='ForzaTelemetryApp', width=700, height=700)
 dpg.setup_dearpygui()
 dpg.configure_app(docking=True, docking_space=True)
 dpg.show_viewport()
