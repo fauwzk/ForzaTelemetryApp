@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 import os
 import warnings
+import ping3
 
 # Need rewriting with threading
 warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
@@ -26,6 +27,7 @@ with dpg.value_registry():
 	dpg.add_string_value(default_value="192.168.1.8", tag="ip_address")
 	dpg.add_string_value(default_value="5300", tag="port")
 	dpg.add_string_value(tag="gear")
+	dpg.add_string_value(tag="speed")
 	dpg.add_string_value(tag="rpm")
 	dpg.add_string_value(tag="power")
 	dpg.add_string_value(tag="torque")
@@ -39,7 +41,11 @@ with dpg.value_registry():
 	dpg.add_string_value(default_value="Not connected", tag="ping")
 	dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
+with dpg.font_registry():
+	default_font = dpg.add_font("font.ttf", 65)
+
 def connect():
+	global connection_status
 	ip = dpg.get_value("ip_address")
 	port = dpg.get_value("port")
 	try:
@@ -48,14 +54,15 @@ def connect():
 		data_gen.set_server(ip, port)
 		data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
 		returned_data = data_gen.get_data(data)
+
 		dpg.set_value("status", "Connected")
 		#dpg.configure_item("status_window", show=False)
 		dpg.set_value("run_status", "Not Running")
-		connection_status = 1
 		ping = round((ping3.ping(ip)*1000), 1)
 		ping = f"{ping}.ms"
 		dpg.set_value("ping", ping)
 		dpg.set_value("run_status", "Not Running")
+		connection_status = 1
 	except Exception as e:
 		#print(e)
 		print("su")
@@ -96,17 +103,6 @@ def graph():
 				power = round((returned_data['Power']*1.34102)/1000)
 				torque = round(returned_data['Torque'], 1) 
 				boost = round((returned_data["Boost"] / 14.504), 2)
-				#print(gear, gear_setting)
-				dpg.set_value("gear", gear)
-				dpg.set_value("rpm", rpm)
-				dpg.set_value("boost", boost)
-				if power > 0:
-					dpg.set_value("power", power)
-					dpg.set_value("torque", torque)
-				else:
-					dpg.set_value("power", 0)
-					dpg.set_value("torque", 0)
-					continue
 				if gear_setting == gear:
 					break
 				else:
@@ -228,34 +224,31 @@ def make_graph(rpm_axis, power_axis, torque_axis, boost_axis):
 	del boost_axis[:]
 
 def get_telemetry():
-	if connection_status != 0:
-		while True:
-			try:
-				data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
-				returned_data = data_gen.get_data(data)
-				gear = returned_data['Gear']
-				rpm = round(returned_data['CurrentEngineRpm'])
-				power = round((returned_data['Power']*1.34102)/1000)
-				torque = round(returned_data['Torque'], 1) 
-				boost = round(returned_data['Boost']/14.504, 2)
-				dpg.set_value("gear", gear)
-				dpg.set_value("rpm", rpm)
-				dpg.set_value("boost", boost)
-				if power > 0:
-					dpg.set_value("power", power)
-					dpg.set_value("torque", torque)
-				else:
-					dpg.set_value("power", 0)
-					dpg.set_value("torque", 0)
-					continue		
-				#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
-			except Exception as e:
-				dpg.set_value('error', e)
-				dpg.configure_item("error_window", show=True)
-				break
-	else:
-		dpg.set_value('error', "Not connected")
-		dpg.configure_item("error_window", show=True)
+	if connection_status == 1:
+		try:
+			data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
+			returned_data = data_gen.get_data(data)
+			gear = returned_data['Gear']
+			rpm = round(returned_data['CurrentEngineRpm'])
+			speed = int(round(returned_data['Speed']*3.6, 0))
+			power = round((returned_data['Power']*1.34102)/1000)
+			torque = round(returned_data['Torque'], 1) 
+			boost = round(returned_data['Boost']/14.504, 2)
+			dpg.set_value("gear", gear)
+			dpg.set_value("speed", speed)
+			dpg.set_value("rpm", rpm)
+			dpg.set_value("boost", boost)
+			if power > 0:
+				dpg.set_value("power", power)
+				dpg.set_value("torque", torque)
+			else:
+				dpg.set_value("power", 0)
+				dpg.set_value("torque", 0)		
+			#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
+		except Exception as e:
+			dpg.set_value('error', e)
+			dpg.configure_item("error_window", show=True)
+			connection_status = 0
 
 with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_values_file_picker", width=500, height=400, default_path=home_path):
 	dpg.add_file_extension(".json", color=(255, 0, 255, 255), custom_text="[JSON]")
@@ -265,16 +258,35 @@ with dpg.window(label="Main", autosize=True, pos=(10, 30)):
 	dpg.add_input_text(label="PORT", source="port", width=125)
 	dpg.add_button(label="Connect", callback=connect)
 	dpg.add_separator()
+	dpg.add_text(default_value="Connection status:")
+	dpg.add_text(source="status")
 	dpg.add_text(default_value="Ping:")
 	dpg.add_text(source="ping")
 
 with dpg.window(label="Car Telemetry", autosize=True, pos=(10, 175)):
-	dpg.add_button(label="Start", callback=get_telemetry)
-	dpg.add_text(source="gear")
-	dpg.add_text(source="rpm")
-	dpg.add_text(source="power")
-	dpg.add_text(source="torque")
-	dpg.add_text(source="boost")
+	dpg.add_text(default_value="Gear")
+	t1 = dpg.add_text(source="gear")
+	dpg.bind_item_font(t1, default_font)
+	dpg.add_separator()
+	dpg.add_text(default_value="RPMs")
+	t2 = dpg.add_text(source="rpm")
+	dpg.bind_item_font(t2, default_font)
+	dpg.add_separator()
+	dpg.add_text(default_value="Speed")
+	t3 = dpg.add_text(source="speed")
+	dpg.bind_item_font(t3, default_font)
+	dpg.add_separator()
+	dpg.add_text(default_value="Power")
+	t4 = dpg.add_text(source="power")
+	dpg.bind_item_font(t4, default_font)
+	dpg.add_separator()
+	dpg.add_text(default_value="Torque")
+	t5 = dpg.add_text(source="torque")
+	dpg.bind_item_font(t5, default_font)
+	dpg.add_separator()
+	dpg.add_text(default_value="Boost")
+	t6 = dpg.add_text(source="boost")
+	dpg.bind_item_font(t6, default_font)
 
 with dpg.window(label="Graph", autosize=True, pos=(125, 175)):
 	dpg.add_slider_int(label="Gearbox", min_value=2, max_value=10, source="gearbox", width=62)
@@ -318,5 +330,7 @@ dpg.create_viewport(title='ForzaTelemetryApp', width=700, height=700)
 dpg.setup_dearpygui()
 dpg.configure_app(docking=True, docking_space=True)
 dpg.show_viewport()
-dpg.start_dearpygui()
+while dpg.is_dearpygui_running():
+	get_telemetry()
+	dpg.render_dearpygui_frame()
 dpg.destroy_context()
