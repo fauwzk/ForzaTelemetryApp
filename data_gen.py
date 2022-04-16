@@ -30,7 +30,7 @@ with open(resource_path('data_format.txt'), 'r') as f:
 jumps={
     's32': 4, #Signed 32bit int, 4 bytes of size
     'u32': 4, #Unsigned 32bit int
-    'f32': 4, #Floating point 32bit
+    'f32': 4, #Floating point 32b0it
     'u16': 2, #Unsigned 16bit int
     'u8': 1, #Unsigned 8bit int
     's8': 1, #Signed 8bit int
