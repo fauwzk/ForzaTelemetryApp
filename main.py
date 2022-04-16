@@ -15,7 +15,10 @@ warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of 
 
 dpg.create_context()
 
+connection_status = 0
+
 global home_path
+
 home_path = os.path.expanduser('~')
 gear_setting_default = 6
 
@@ -47,83 +50,89 @@ def connect():
 		dpg.set_value("connect_status", "Connected")
 		dpg.configure_item("connection_window", show=False)
 		dpg.set_value("run_status", "Not Running")
+		connection_status = 1
 	except Exception as e:
 		print(e)
+		connection_status = 0
 		dpg.set_value("connect_status", f"Error:\n{e}")
 		time.sleep(5)
 		dpg.configure_item("connection_window", show=False)
 
 def graph():
-	global rpm_axis
-	global power_axis
-	global torque_axis
-	global boost_axis
-	rpm_axis = []
-	power_axis = []
-	torque_axis = []
-	boost_axis = []
-	dpg.set_value("run_status", "Running")
-	gear_setting = int(dpg.get_value("gearbox")) 
-	dpg.set_value("gear_setting", str(gear_setting))
-	try:
-		data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
-		returned_data = data_gen.get_data(data)
-		global carperf 
-		carperf = returned_data['CarPerformanceIndex']
-		while True:
+	if connection_status != 0:
+		global rpm_axis
+		global power_axis
+		global torque_axis
+		global boost_axis
+		rpm_axis = []
+		power_axis = []
+		torque_axis = []
+		boost_axis = []
+		dpg.set_value("run_status", "Running")
+		gear_setting = int(dpg.get_value("gearbox")) 
+		dpg.set_value("gear_setting", str(gear_setting))
+		try:
 			data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
 			returned_data = data_gen.get_data(data)
-			gear = returned_data['Gear']
-			rpm = round(returned_data['CurrentEngineRpm'])
-			power = round((returned_data['Power']*1.34102)/1000)
-			torque = round(returned_data['Torque'], 1) 
-			boost = round((returned_data["Boost"] / 14.504), 2)
-			#print(gear, gear_setting)
-			dpg.set_value("gear", gear)
-			dpg.set_value("rpm", rpm)
-			dpg.set_value("boost", boost)
-			if power > 0:
-				dpg.set_value("power", power)
-				dpg.set_value("torque", torque)
-			else:
-				dpg.set_value("power", 0)
-				dpg.set_value("torque", 0)
-				continue
-			if gear_setting == gear:
-				break
-			else:
+			global carperf 
+			carperf = returned_data['CarPerformanceIndex']
+			while True:
+				data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
+				returned_data = data_gen.get_data(data)
+				gear = returned_data['Gear']
+				rpm = round(returned_data['CurrentEngineRpm'])
+				power = round((returned_data['Power']*1.34102)/1000)
+				torque = round(returned_data['Torque'], 1) 
+				boost = round((returned_data["Boost"] / 14.504), 2)
+				#print(gear, gear_setting)
+				dpg.set_value("gear", gear)
+				dpg.set_value("rpm", rpm)
+				dpg.set_value("boost", boost)
 				if power > 0:
-					if power_axis:
-						power_high = power_axis[-1]
-						if power:
-						#if power:
-							torque_high = torque_axis[-1]
-							if torque:
-							#if torque:
-								rpm_high = rpm_axis[-1]
-								#if rpm > int(rpm_high):
-								if rpm > int(rpm_high):
-									rpm_axis.append(rpm)
-									power_axis.append(power)
-									torque_axis.append(torque)
-									boost_axis.append(boost*10)
+					dpg.set_value("power", power)
+					dpg.set_value("torque", torque)
+				else:
+					dpg.set_value("power", 0)
+					dpg.set_value("torque", 0)
+					continue
+				if gear_setting == gear:
+					break
+				else:
+					if power > 0:
+						if power_axis:
+							power_high = power_axis[-1]
+							if power:
+							#if power:
+								torque_high = torque_axis[-1]
+								if torque:
+								#if torque:
+									rpm_high = rpm_axis[-1]
+									#if rpm > int(rpm_high):
+									if rpm > int(rpm_high):
+										rpm_axis.append(rpm)
+										power_axis.append(power)
+										torque_axis.append(torque)
+										boost_axis.append(boost*10)
+									else:
+										continue
 								else:
 									continue
 							else:
 								continue
 						else:
-							continue
+							rpm_axis.append(rpm)
+							power_axis.append(power)
+							torque_axis.append(torque)
+							boost_axis.append(boost*10)
 					else:
-						rpm_axis.append(rpm)
-						power_axis.append(power)
-						torque_axis.append(torque)
-						boost_axis.append(boost*10)
-				else:
-					continue
-		dpg.set_value("run_status", "Peak ploting")
-		make_graph(rpm_axis, power_axis, torque_axis, boost_axis)
-	except Exception as e:
-		dpg.set_value('error', e)
+						continue
+			dpg.set_value("run_status", "Peak ploting")
+			make_graph(rpm_axis, power_axis, torque_axis, boost_axis)
+		except Exception as e:
+			dpg.set_value('error', e)
+			dpg.configure_item("errors_window", show=True)
+	else:
+		dpg.set_value('error', "Not connected")
 		dpg.configure_item("errors_window", show=True)
 
 def open_values(sender, app_data, user_data):
@@ -148,24 +157,28 @@ def open_values(sender, app_data, user_data):
 	make_graph(rpm_axis, power_axis, torque_axis, boost_axis)
 
 def save_values():
-	try:
-		data = {}
-		data['rpm'] = rpm_axis
-		data['power'] = power_axis
-		data['torque'] = torque_axis
-		data['boost'] = boost_axis
-		now = datetime.now()
-		now = now.strftime("%d%m%Y_%H%M%S")
-		filename = f"{now}-{carperf}.json"
-		dpg.configure_item("save_window", show=True)
-		dpg.set_value("save_status", f"Saving {filename}")
-		with open(f"{home_path}\\{filename}", 'w') as file: 
-			json.dump(data, file)
-		dpg.configure_item("save_window", show=False)
-		dpg.set_value("save_status", f"Saved:\n{home_path}\\{filename}")
-		dpg.configure_item("save_window", show=True)
-	except Exception as e:
-		dpg.set_value('error', e)
+	if connection_status != 0:
+		try:
+			data = {}
+			data['rpm'] = rpm_axis
+			data['power'] = power_axis
+			data['torque'] = torque_axis
+			data['boost'] = boost_axis
+			now = datetime.now()
+			now = now.strftime("%d%m%Y_%H%M%S")
+			filename = f"{now}-{carperf}.json"
+			dpg.configure_item("save_window", show=True)
+			dpg.set_value("save_status", f"Saving {filename}")
+			with open(f"{home_path}\\{filename}", 'w') as file: 
+				json.dump(data, file)
+			dpg.configure_item("save_window", show=False)
+			dpg.set_value("save_status", f"Saved:\n{home_path}\\{filename}")
+			dpg.configure_item("save_window", show=True)
+		except Exception as e:
+			dpg.set_value('error', e)
+			dpg.configure_item("errors_window", show=True)
+	else:
+		dpg.set_value('error', "Not connected")
 		dpg.configure_item("errors_window", show=True)
 
 def make_graph(rpm_axis, power_axis, torque_axis, boost_axis):
@@ -203,33 +216,37 @@ def make_graph(rpm_axis, power_axis, torque_axis, boost_axis):
 	del boost_axis[:]
 
 def run():
-	#dpg.set_value("run_status", "Running")
-	while True:
-		try:
-			data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
-			returned_data = data_gen.get_data(data)
-			gear = returned_data['Gear']
-			rpm = round(returned_data['CurrentEngineRpm'])
-			power = round((returned_data['Power']*1.34102)/1000)
-			torque = round(returned_data['Torque'], 1) 
-			boost = round(returned_data['Boost']/14.504, 2)
-			dpg.set_value("gear", gear)
-			dpg.set_value("rpm", rpm)
-			dpg.set_value("boost", boost)
-			if power > 0:
-				dpg.set_value("power", power)
-				dpg.set_value("torque", torque)
-			else:
-				dpg.set_value("power", 0)
-				dpg.set_value("torque", 0)
-				continue		
-			#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
-		except Exception as e:
-			dpg.set_value('error', e)
-			dpg.configure_item("errors_window", show=True)
-			break
+	if connection_status != 0:
+		#dpg.set_value("run_status", "Running")
+		while True:
+			try:
+				data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
+				returned_data = data_gen.get_data(data)
+				gear = returned_data['Gear']
+				rpm = round(returned_data['CurrentEngineRpm'])
+				power = round((returned_data['Power']*1.34102)/1000)
+				torque = round(returned_data['Torque'], 1) 
+				boost = round(returned_data['Boost']/14.504, 2)
+				dpg.set_value("gear", gear)
+				dpg.set_value("rpm", rpm)
+				dpg.set_value("boost", boost)
+				if power > 0:
+					dpg.set_value("power", power)
+					dpg.set_value("torque", torque)
+				else:
+					dpg.set_value("power", 0)
+					dpg.set_value("torque", 0)
+					continue		
+				#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
+			except Exception as e:
+				dpg.set_value('error', e)
+				dpg.configure_item("errors_window", show=True)
+				break
+	else:
+		dpg.set_value('error', "Not connected")
+		dpg.configure_item("errors_window", show=True)
 
-with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_values_file_picker", width=500, height=300, default_path=home_path):
+with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_values_file_picker", width=300, height=200, default_path=home_path):
 	dpg.add_file_extension(".json", color=(255, 0, 255, 255), custom_text="[JSON]")
 
 with dpg.window(label="Main", autosize=True, pos=(10, 30)):
@@ -251,7 +268,6 @@ with dpg.window(label="Graph", autosize=True, pos=(125, 175)):
 	dpg.add_text(default_value="Status :")
 	dpg.add_text(source="run_status")
 
-
 with dpg.window(label="Connection Status", autosize=True, modal=True, show=False, id="connection_window", no_title_bar=True):
 	dpg.add_text(source="connect_status")
 	#dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("connection_window", show=False))
@@ -270,8 +286,9 @@ with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="
 	dpg.add_text(source="save_status")
 	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("save_window", show=False))
 
-dpg.create_viewport(title='ForzaTelemetryApp', width=350, height=400)
+dpg.create_viewport(title='ForzaTelemetryApp', width=500, height=500)
 dpg.setup_dearpygui()
+dpg.configure_app(docking=True, docking_space=True)
 dpg.show_viewport()
 dpg.start_dearpygui()
 dpg.destroy_context()
