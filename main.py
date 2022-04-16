@@ -15,7 +15,8 @@ warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of 
 
 dpg.create_context()
 
-init_file = "fta.ini"
+initfile = "fta.ini"
+global home_path
 home_path = os.path.expanduser('~')
 
 connection_status = 0
@@ -33,6 +34,7 @@ with dpg.value_registry():
 	dpg.add_string_value(default_value="Not connected", tag="connect_status")
 	dpg.add_string_value(default_value="Not connected", tag="save_status")
 	dpg.add_string_value(default_value=gear_setting_default, tag="gear_setting")
+	dpg.add_string_value(default_value="Not connected", tag="status")
 	dpg.add_string_value(default_value="Not connected", tag="error")
 	dpg.add_string_value(default_value="Not connected", tag="ping")
 	dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
@@ -41,13 +43,13 @@ def connect():
 	ip = dpg.get_value("ip_address")
 	port = dpg.get_value("port")
 	try:
-		dpg.set_value("error", f"Connecting to {ip}:{port}")
-		dpg.configure_item("errors_window", show=True)
+		dpg.set_value("status", f"Connecting to {ip}:{port}")
+		dpg.configure_item("status_window", show=True)
 		data_gen.set_server(ip, port)
 		data, addr = data_gen.sock.recvfrom(1500) # buffer size is 1500 bytes, this line reads data from the socket
 		returned_data = data_gen.get_data(data)
-		dpg.set_value("error", "Connected")
-		dpg.configure_item("errors_window", show=False)
+		dpg.set_value("status", "Connected")
+		#dpg.configure_item("status_window", show=False)
 		dpg.set_value("run_status", "Not Running")
 		connection_status = 1
 		ping = round((ping3.ping(ip)*1000), 1)
@@ -55,12 +57,14 @@ def connect():
 		dpg.set_value("ping", ping)
 		dpg.set_value("run_status", "Not Running")
 	except Exception as e:
-		print(e)
+		#print(e)
+		print("su")
 		connection_status = 0
-		dpg.set_value("error", f"Error:\n{e}")
-		dpg.configure_item("errors_window", show=True)
+		dpg.set_value("status", f"Error:\n{e}")
+		dpg.configure_item("status_window", show=True)
 
 def save_init_file():
+	init_file = f"{home_path}\\{initfile}"
 	dpg.save_init_file(init_file)
 	dpg.configure_item("save_window", show=False)
 	dpg.set_value("save_status", f"Saved:\n{init_file}")
@@ -138,10 +142,10 @@ def graph():
 			make_graph(rpm_axis, power_axis, torque_axis, boost_axis)
 		except Exception as e:
 			dpg.set_value('error', e)
-			dpg.configure_item("errors_window", show=True)
+			dpg.configure_item("error_window", show=True)
 	else:
 		dpg.set_value('error', "Not connected")
-		dpg.configure_item("errors_window", show=True)
+		dpg.configure_item("error_window", show=True)
 
 def open_values(sender, app_data, user_data):
 	rpm_axis = []
@@ -184,10 +188,10 @@ def save_values():
 			dpg.configure_item("save_window", show=True)
 		except Exception as e:
 			dpg.set_value('error', e)
-			dpg.configure_item("errors_window", show=True)
+			dpg.configure_item("error_window", show=True)
 	else:
 		dpg.set_value('error', "Not connected")
-		dpg.configure_item("errors_window", show=True)
+		dpg.configure_item("error_window", show=True)
 
 def make_graph(rpm_axis, power_axis, torque_axis, boost_axis):
 	peak_hp = max(power_axis)
@@ -247,13 +251,13 @@ def get_telemetry():
 				#print(f"RPM = {rpm}, Power = {power}, Torque = {torque}, Boost = {boost}")
 			except Exception as e:
 				dpg.set_value('error', e)
-				dpg.configure_item("errors_window", show=True)
+				dpg.configure_item("error_window", show=True)
 				break
 	else:
 		dpg.set_value('error', "Not connected")
-		dpg.configure_item("errors_window", show=True)
+		dpg.configure_item("error_window", show=True)
 
-with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_values_file_picker", width=300, height=200, default_path=home_path):
+with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_values_file_picker", width=500, height=400, default_path=home_path):
 	dpg.add_file_extension(".json", color=(255, 0, 255, 255), custom_text="[JSON]")
 
 with dpg.window(label="Main", autosize=True, pos=(10, 30)):
@@ -276,14 +280,18 @@ with dpg.window(label="Graph", autosize=True, pos=(125, 175)):
 	dpg.add_slider_int(label="Gearbox", min_value=2, max_value=10, source="gearbox", width=62)
 	dpg.add_button(label="Start", callback=graph)
 
-with dpg.window(label="Errors", autosize=True, modal=True, show=False, id="errors_window", no_title_bar=True):
+with dpg.window(label="App error", autosize=True, modal=True, show=False, id="error_window", no_title_bar=True):
 	dpg.add_text(default_value="Error:")
 	dpg.add_text(source="error")
-	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("errors_window", show=False))
+	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("error_window", show=False))
 
-with dpg.window(label="Status", autosize=True):
+with dpg.window(label="App Status", autosize=True):
 	dpg.add_text(default_value="Status :")
 	dpg.add_text(source="run_status")
+
+with dpg.window(label="Status", autosize=True, modal=True, show=False, id="status_window", no_title_bar=True):
+	dpg.add_text(source="status")
+	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("status_window", show=False))
 
 with dpg.viewport_menu_bar():
 	with dpg.menu(label="Logs"):
@@ -298,6 +306,13 @@ with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="
 	dpg.add_text(source="save_status")
 	dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("save_window", show=False))
 
+with dpg.theme() as global_theme:
+	with dpg.theme_component(dpg.mvAll):
+		dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
+		dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
+
+dpg.bind_theme(global_theme)
+init_file = f"{home_path}\\{initfile}"
 dpg.configure_app(init_file=init_file)  # default file is 'fta.ini'
 dpg.create_viewport(title='ForzaTelemetryApp', width=700, height=700)
 dpg.setup_dearpygui()
