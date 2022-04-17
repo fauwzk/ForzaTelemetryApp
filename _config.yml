@@ -1,4 +1,2 @@
 show_downloads: True
-  github:  
-      zip_url: https://github.com/fauwzk/ForzaTelemetryApp/releases/download/release/ForzaTelemetryApp.exe
 theme: jekyll-theme-cayman
