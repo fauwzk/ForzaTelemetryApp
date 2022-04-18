@@ -1,2 +1,5 @@
 show_downloads: False
+github:
+  zip_url: https://github.com/fauwzk/ForzaTelemetryApp/zipball/master
+  tar_url: https://github.com/fauwzk/ForzaTelemetryApp/tarball/master
 theme: jekyll-theme-minimal
