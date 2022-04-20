@@ -14,6 +14,7 @@ import ping3
 import shutil
 from rich.console import Console
 from rich.text import Text
+from pathlib import Path, PureWindowsPath
 
 # Need rewriting with threading
 warnings.filterwarnings(
@@ -23,7 +24,7 @@ warnings.filterwarnings(
 
 dpg.create_context()
 
-default_initfile = "default.ini"
+default_initfile = "src\\default.ini"
 initfile = "fta.ini"
 global home_path
 home_path = os.path.expanduser("~")
@@ -50,8 +51,10 @@ with dpg.value_registry():
     dpg.add_string_value(default_value="Not connected", tag="ping")
     dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
-font_path = data_gen.resource_path("font.otf")
 with dpg.font_registry():
+    print(PureWindowsPath("src/font.otf"))
+    font_path = data_gen.resource_path(PureWindowsPath("src/font.otf"))
+    print(font_path)
     app_font = dpg.add_font(font_path, 15)
     telemetry_font = dpg.add_font(font_path, 65)
 
@@ -73,7 +76,7 @@ def connect():
         dpg.set_value("status", "Connected")
         # dpg.configure_item("status_window", show=False)
         dpg.set_value("run_status", "Not Running")
-        ping = round((ping3.ping(ip) * 1000), 1)
+        ping = round(ping3.ping(ip, unit='ms'), 1)
         ping = f"{ping}.ms"
         dpg.set_value("ping", ping)
         dpg.set_value("run_status", "Not Running")
