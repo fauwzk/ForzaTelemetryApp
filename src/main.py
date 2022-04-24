@@ -76,7 +76,7 @@ def connect():
         dpg.set_value("status", "Connected")
         # dpg.configure_item("status_window", show=False)
         dpg.set_value("run_status", "Not Running")
-        ping = round(ping3.ping(ip, unit='ms'), 1)
+        ping = round(ping3.ping(ip, unit="ms"), 1)
         ping = f"{ping}.ms"
         dpg.set_value("ping", ping)
         dpg.set_value("run_status", "Not Running")
