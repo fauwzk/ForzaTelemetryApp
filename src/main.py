@@ -24,7 +24,7 @@ warnings.filterwarnings(
 
 dpg.create_context()
 
-default_initfile = "src\\default.ini"
+default_initfile = PureWindowsPath("src/default.ini")
 initfile = "fta.ini"
 global home_path
 home_path = os.path.expanduser("~")
@@ -89,7 +89,7 @@ def connect():
 
 
 def save_init_file():
-    init_file = f"{home_path}\\{initfile}"
+    init_file = PureWindowsPath(f"{home_path}/{initfile}")
     dpg.save_init_file(init_file)
     dpg.configure_item("save_window", show=False)
     dpg.set_value("save_status", f"Saved:\n{init_file}")
@@ -293,7 +293,6 @@ def get_telemetry():
             dpg.configure_item("error_window", show=True)
             connection_status = 0
 
-
 with dpg.file_dialog(
     modal=True,
     show=False,
@@ -419,7 +418,7 @@ with dpg.theme() as global_theme:
 dpg.bind_theme(global_theme)
 console = Console()
 
-home_init_file = f"{home_path}\\{initfile}"
+home_init_file = PureWindowsPath(f"{home_path}/{initfile}")
 init_exist = os.path.exists(home_init_file)
 if init_exist == False:
     text = Text("Copying defaut init file to home folder")
