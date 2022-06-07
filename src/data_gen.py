@@ -5,6 +5,12 @@ import os
 
 
 def set_server(ip, port):
+    """
+    It create a UDP client to connect to the game server.
+    
+    :param ip: The IP address of the server
+    :param port: The port number that the server will listen on
+    """
     UDP_IP = str(ip)  # This sets server ip to the RPi ip
     UDP_PORT = int(port)  # You can freely edit this
     # setting up an udp server
@@ -15,6 +21,13 @@ def set_server(ip, port):
 
 
 def resource_path(relative_path):
+    """
+    If the program is running from a PyInstaller .exe, it returns the path to the .exe. Otherwise, it
+    returns the path to the script
+    
+    :param relative_path: The path to the file relative to the directory containing the executable
+    :return: The path to the file.
+    """
     try:
         base_path = sys._MEIPASS
     except Exception:
@@ -23,6 +36,7 @@ def resource_path(relative_path):
 
 
 # reading data and assigning names to ata types in data_types dict
+# Reading the data_format.txt file and creating a dictionary with the data types.
 data_types = {}
 with open(resource_path("src\data_format.txt"), "r") as f:
     lines = f.read().split("\n")
@@ -30,6 +44,7 @@ with open(resource_path("src\data_format.txt"), "r") as f:
         data_types[line.split()[1]] = line.split()[0]
 
 # assigning sizes in bytes to each variable type
+# A dictionary that maps the data type to the number of bytes that the data type takes up.
 jumps = {
     "s32": 4,  # Signed 32bit int, 4 bytes of size
     "u32": 4,  # Unsigned 32bit int
@@ -44,6 +59,12 @@ return_dict = {}
 
 
 def get_data(data):
+    """
+    It takes a byte string, decodes it and returns a dict with the decoded data
+    
+    :param data: the data to be decoded
+    :return: A dict with the decoded data.
+    """
     # additional var
     passed_data = data
     for i in data_types:
