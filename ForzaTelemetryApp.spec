@@ -4,10 +4,10 @@
 block_cipher = None
 
 
-a = Analysis(['src\\main.py'],
+a = Analysis(['main.py'],
              pathex=[],
              binaries=[],
-             datas=[('src\\data_format.txt', '.'), ('src\\font.otf', '.'), ('src\\data_gen.py', '.'), ('src\\default.ini', '.')],
+             datas=[('data_format.txt', '.'), ('font.otf', '.'), ('data_gen.py', '.'), ('fta.ini', '.')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},

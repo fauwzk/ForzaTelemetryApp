@@ -2,9 +2,6 @@ import data_gen
 import dearpygui.dearpygui as dpg
 import dearpygui.demo as demo
 import matplotlib.pyplot as plt
-import time
-import sys
-import traceback
 import json
 from datetime import datetime
 import os
@@ -21,14 +18,13 @@ warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of 
 
 dpg.create_context()
 
-default_initfile = "src\\default.ini"
+default_initfile = "default.ini"
 initfile = "fta.ini"
 global home_path
 home_path = os.path.expanduser("~")
 
 connection_status = 0
 gear_setting_default = 4
-json_version = 1.0
 
 with dpg.value_registry():
     dpg.add_string_value(default_value="192.168.1.8", tag="ip_address")
@@ -42,15 +38,15 @@ with dpg.value_registry():
     dpg.add_string_value(default_value="Not connected", tag="run_status")
     dpg.add_string_value(default_value="Not connected", tag="connect_status")
     dpg.add_string_value(default_value="Not connected", tag="save_status")
-    dpg.add_string_value(default_value=gear_setting_default, tag="gear_setting")
     dpg.add_string_value(default_value="Not connected", tag="status")
     dpg.add_string_value(default_value="Not connected", tag="error")
     dpg.add_string_value(default_value="Not connected", tag="ping")
+    dpg.add_string_value(default_value=gear_setting_default, tag="gear_setting")
     dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
 with dpg.font_registry():
-    print(PureWindowsPath("src/font.otf"))
-    font_path = data_gen.resource_path(PureWindowsPath("src/font.otf"))
+    print("font.otf")
+    font_path = data_gen.resource_path("font.otf")
     print(font_path)
     app_font = dpg.add_font(font_path, 15)
     telemetry_font = dpg.add_font(font_path, 65)
@@ -168,8 +164,6 @@ def open_values(sender, app_data, user_data):
     dpg.set_value("run_status", f"Opening\n{file_name}")
     with open(path) as json_file:
         data = json.load(json_file)
-        version = data["version"]
-        text = Text(f"JSON output version: {version}")
         text.stylize("bold white")
         console.print(text)
         rpm_axis = data["rpm"]
@@ -183,7 +177,6 @@ def save_values():
     if connection_status != 0:
         try:
             data = {}
-            data["version"] = json_version
             data["rpm"] = rpm_axis
             data["power"] = power_axis
             data["torque"] = torque_axis
@@ -343,8 +336,10 @@ with dpg.theme() as global_theme:
 dpg.bind_theme(global_theme)
 console = Console()
 
+print(home_path)
 home_init_file = f"{home_path}\\{initfile}"
 init_exist = os.path.exists(home_init_file)
+
 if init_exist == False:
     text = Text("Copying defaut init file to home folder")
     text.stylize("bold red")
