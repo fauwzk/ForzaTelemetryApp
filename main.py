@@ -11,7 +11,7 @@ import ping3
 import shutil
 from rich.console import Console
 from rich.text import Text
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 
 # Need rewriting with threading
 warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
@@ -337,7 +337,8 @@ dpg.bind_theme(global_theme)
 console = Console()
 
 print(home_path)
-home_init_file = f"{home_path}\\{initfile}"
+home_init_file = Path(f"{home_path}/{initfile}")
+print(home_init_file)
 init_exist = os.path.exists(home_init_file)
 
 if init_exist == False:
