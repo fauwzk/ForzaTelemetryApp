@@ -1,6 +1,5 @@
 import data_gen
 import dearpygui.dearpygui as dpg
-import dearpygui.demo as demo
 import matplotlib.pyplot as plt
 import json
 from datetime import datetime
@@ -27,7 +26,7 @@ connection_status = 0
 gear_setting_default = 4
 
 with dpg.value_registry():
-    dpg.add_string_value(default_value="192.168.1.8", tag="ip_address")
+    dpg.add_string_value(default_value="127.0.0.1", tag="ip_address")
     dpg.add_string_value(default_value="5300", tag="port")
     dpg.add_string_value(tag="gear")
     dpg.add_string_value(tag="speed")
@@ -78,7 +77,8 @@ def connect():
         dpg.configure_item("status_window", show=True)
 
 def save_init_file():
-    init_file = f"{home_path}\\{initfile}"
+    init_file = Path(f"{home_path}/{initfile}")
+    print(init_file)
     dpg.save_init_file(init_file)
     dpg.configure_item("save_window", show=False)
     dpg.set_value("save_status", f"Saved:\n{init_file}")
@@ -181,15 +181,17 @@ def save_values():
             data["power"] = power_axis
             data["torque"] = torque_axis
             data["boost"] = boost_axis
+            print(data)
             now = datetime.now()
             now = now.strftime("%d%m%Y_%H%M%S")
             filename = f"{now}-{carperf}.json"
             dpg.configure_item("save_window", show=True)
             dpg.set_value("save_status", f"Saving {filename}")
-            with open(f"{home_path}\\{filename}", "w") as file:
+            open_file = Path(f"{home_path}/{filename}")
+            with open(open_file, "w") as file:
                 json.dump(data, file, indent=4)
             dpg.configure_item("save_window", show=False)
-            dpg.set_value("save_status", f"Saved:\n{home_path}\\{filename}")
+            dpg.set_value("save_status", f"Saved:\n{open_file}")
             dpg.configure_item("save_window", show=True)
         except Exception as e:
             dpg.set_value("error", e)
@@ -338,7 +340,6 @@ console = Console()
 
 print(home_path)
 home_init_file = Path(f"{home_path}/{initfile}")
-print(home_init_file)
 init_exist = os.path.exists(home_init_file)
 
 if init_exist == False:
