@@ -24,7 +24,7 @@ connection_status = 0
 gear_setting_default = 4
 
 with dpg.value_registry():
-    dpg.add_string_value(default_value="127.0.0.1", tag="ip_address")
+    dpg.add_string_value(default_value="192.168.1.28", tag="ip_address")
     dpg.add_string_value(default_value="5300", tag="port")
     dpg.add_string_value(tag="gear")
     dpg.add_string_value(tag="speed")
