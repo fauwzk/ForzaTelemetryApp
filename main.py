@@ -187,11 +187,10 @@ def save_values():
             filename = f"{now}-{carperf}.json"
             dpg.configure_item("save_window", show=True)
             dpg.set_value("save_status", f"Saving {filename}")
-            open_file = Path(f"{home_path}/{filename}")
-            with open(open_file, "w") as file:
+            with open(Path(f"{home_path}/{filename}"), "w") as file:
                 json.dump(data, file, indent=4)
             dpg.configure_item("save_window", show=False)
-            dpg.set_value("save_status", f"Saved:\n{open_file}")
+            dpg.set_value("save_status", f"Saved:\n{home_path}/{filename}")
             dpg.configure_item("save_window", show=True)
         except Exception as e:
             dpg.set_value("error", e)
@@ -343,18 +342,12 @@ home_init_file = Path(f"{home_path}/{initfile}")
 init_exist = os.path.exists(home_init_file)
 
 if init_exist == False:
-    text = Text("Copying defaut init file to home folder")
-    text.stylize("bold red")
-    console.print(text)
+    print("Copying defaut init file to home folder")
     shutil.copyfile(data_gen.resource_path(default_initfile), home_init_file)
     init_file = home_init_file
-    text = Text("Init file copied")
-    text.stylize("italic green")
-    console.print(text)
+    print("Init file copied")
 else:
-    text = Text("Init file exist")
-    text.stylize("italic green")
-    console.print(text)
+    print("Init file exist")
     init_file = home_init_file
 
 dpg.configure_app(init_file=init_file)
