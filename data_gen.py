@@ -38,7 +38,7 @@ def resource_path(relative_path):
 # reading data and assigning names to ata types in data_types dict
 # Reading the data_format.txt file and creating a dictionary with the data types.
 data_types = {}
-with open(resource_path(Path("src/data_format.txt")), "r") as f:
+with open(Path("data_format.txt"), "r") as f:
     lines = f.read().split("\n")
     for line in lines:
         data_types[line.split()[1]] = line.split()[0]
