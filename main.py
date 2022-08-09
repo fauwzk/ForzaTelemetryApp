@@ -77,7 +77,7 @@ def connect():
         dpg.configure_item("status_window", show=True)
 
 def save_init_file():
-    init_file = Path(f"{home_path}/{initfile}")
+    init_file = str(Path(f"{home_path}/{initfile}"))
     print(init_file)
     dpg.save_init_file(init_file)
     dpg.configure_item("save_window", show=False)
