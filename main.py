@@ -254,8 +254,17 @@ def get_telemetry():
             dpg.configure_item("error_window", show=True)
             connection_status = 0
 
-with dpg.file_dialog(modal=True, show=False, callback=open_values, id="open_values_file_picker", width=500, height=400, default_path=home_path):
-    dpg.add_file_extension(".json", color=(255, 0, 255, 255), custom_text="[JSON]")
+home_init_file = Path(f"{home_path}/{initfile}")
+init_exist = os.path.exists(home_init_file)
+
+if init_exist == False:
+    print("Copying defaut init file to home folder")
+    shutil.copyfile(data_gen.resource_path(default_initfile), home_init_file)
+    init_file = home_init_file
+    print("Init file copied")
+else:
+    print("Init file exist")
+    init_file = home_init_file
 
 with dpg.window(label="Main", autosize=True, pos=(10, 30)):
     dpg.add_input_text(label="IP", source="ip_address", width=125)
@@ -266,7 +275,6 @@ with dpg.window(label="Main", autosize=True, pos=(10, 30)):
     dpg.add_text(source="status")
     dpg.add_text(default_value="Ping:")
     dpg.add_text(source="ping")
-
 with dpg.window(label="Car Telemetry", autosize=True, pos=(10, 175)):
     dpg.add_text(default_value="Gear")
     t1 = dpg.add_text(source="gear")
@@ -291,24 +299,19 @@ with dpg.window(label="Car Telemetry", autosize=True, pos=(10, 175)):
     dpg.add_text(default_value="Boost")
     t6 = dpg.add_text(source="boost")
     dpg.bind_item_font(t6, telemetry_font)
-
 with dpg.window(label="Graph", autosize=True, pos=(125, 175)):
     dpg.add_slider_int(label="Gearbox", min_value=2, max_value=10, source="gearbox", width=62)
     dpg.add_button(label="Start", callback=graph)
-
 with dpg.window(label="App error",autosize=True,modal=True,show=False,id="error_window",no_title_bar=True):
     dpg.add_text(default_value="Error:")
     dpg.add_text(source="error")
     dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("error_window", show=False))
-
 with dpg.window(label="App Status", autosize=True):
     dpg.add_text(default_value="Status :")
     dpg.add_text(source="run_status")
-
 with dpg.window(label="Status",autosize=True,modal=True,show=False,id="status_window",no_title_bar=True):
     dpg.add_text(source="status")
     dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("status_window", show=False))
-
 with dpg.viewport_menu_bar():
     with dpg.menu(label="Logs"):
         dpg.add_menu_item(label="Open", callback=lambda: dpg.show_item("open_values_file_picker"))
@@ -318,29 +321,9 @@ with dpg.viewport_menu_bar():
     with dpg.menu(label="Debug"):
         dpg.add_menu_item(label="Metrics", callback=lambda: dpg.show_metrics())
         dpg.add_menu_item(label="Fonts", callback=lambda: dpg.show_font_manager())
-
 with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="save_window", no_title_bar=True):
     dpg.add_text(source="save_status")
     dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("save_window", show=False))
-
-# with dpg.theme() as global_theme:
-#     with dpg.theme_component(dpg.mvAll):
-#         dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
-#         dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
-
-# dpg.bind_theme(global_theme)
-
-home_init_file = Path(f"{home_path}/{initfile}")
-init_exist = os.path.exists(home_init_file)
-
-if init_exist == False:
-    print("Copying defaut init file to home folder")
-    shutil.copyfile(data_gen.resource_path(default_initfile), home_init_file)
-    init_file = home_init_file
-    print("Init file copied")
-else:
-    print("Init file exist")
-    init_file = home_init_file
 
 dpg.configure_app(init_file=init_file)
 dpg.create_viewport(title="ForzaTelemetryApp", width=700, height=750)
