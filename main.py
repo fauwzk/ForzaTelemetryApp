@@ -8,8 +8,6 @@ import os.path
 import warnings
 import ping3
 import shutil
-from rich.console import Console
-from rich.text import Text
 from pathlib import Path
 
 # Need rewriting with threading
@@ -78,7 +76,6 @@ def connect():
 
 def save_init_file():
     init_file = str(Path(f"{home_path}/{initfile}"))
-    print(init_file)
     dpg.save_init_file(init_file)
     dpg.configure_item("save_window", show=False)
     dpg.set_value("save_status", f"Saved:\n{init_file}")
@@ -164,8 +161,6 @@ def open_values(sender, app_data, user_data):
     dpg.set_value("run_status", f"Opening\n{file_name}")
     with open(path) as json_file:
         data = json.load(json_file)
-        text.stylize("bold white")
-        console.print(text)
         rpm_axis = data["rpm"]
         power_axis = data["power"]
         torque_axis = data["torque"]
@@ -335,7 +330,6 @@ with dpg.theme() as global_theme:
         dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
 
 dpg.bind_theme(global_theme)
-console = Console()
 
 print(home_path)
 home_init_file = Path(f"{home_path}/{initfile}")
