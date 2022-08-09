@@ -12,8 +12,6 @@ import os.path
 import warnings
 import ping3
 import shutil
-from rich.console import Console
-from rich.text import Text
 from pathlib import Path
 
 # Need rewriting with threading
@@ -28,10 +26,9 @@ home_path = os.path.expanduser("~")
 
 connection_status = 0
 gear_setting_default = 4
-json_version = 1.0
 
 with dpg.value_registry():
-    dpg.add_string_value(default_value="192.168.1.8", tag="ip_address")
+    dpg.add_string_value(default_value="192.168.1.28", tag="ip_address")
     dpg.add_string_value(default_value="5300", tag="port")
     dpg.add_string_value(tag="gear")
     dpg.add_string_value(tag="speed")
@@ -50,7 +47,6 @@ with dpg.value_registry():
 
 with dpg.font_registry():
     font_path = str(Path("font.otf"))
-    print(font_path)
     app_font = dpg.add_font(font_path, 15)
     telemetry_font = dpg.add_font(font_path, 65)
 
@@ -75,7 +71,6 @@ def connect():
         dpg.set_value("run_status", "Not Running")
         connection_status = 1
     except Exception as e:
-        # print(e)
         connection_status = 0
         dpg.set_value("status", f"Error:\n{e}")
         dpg.configure_item("status_window", show=True)
@@ -167,10 +162,6 @@ def open_values(sender, app_data, user_data):
     dpg.set_value("run_status", f"Opening\n{file_name}")
     with open(path) as json_file:
         data = json.load(json_file)
-        version = data["version"]
-        text = Text(f"JSON output version: {version}")
-        text.stylize("bold white")
-        console.print(text)
         rpm_axis = data["rpm"]
         power_axis = data["power"]
         torque_axis = data["torque"]
@@ -340,24 +331,17 @@ with dpg.theme() as global_theme:
         dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
 
 dpg.bind_theme(global_theme)
-console = Console()
 
 home_init_file = Path(f"{home_path}/{initfile}")
 
 init_exist = os.path.exists(home_init_file)
 if init_exist == False:
-    text = Text("Copying defaut init file to home folder")
-    text.stylize("bold red")
-    console.print(text)
+    print("Copying defaut init file to home folder")
     shutil.copyfile(default_initfile, home_init_file)
     init_file = home_init_file
-    text = Text("Init file copied")
-    text.stylize("italic green")
-    console.print(text)
+    print("Init file copied")
 else:
-    text = Text("Init file exist")
-    text.stylize("italic green")
-    console.print(text)
+    print("Init file exist")
     init_file = home_init_file
 
 dpg.configure_app(init_file=init_file)
