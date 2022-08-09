@@ -317,11 +317,17 @@ with dpg.viewport_menu_bar():
         dpg.add_menu_item(label="Save", callback=save_init_file)
     with dpg.menu(label="Debug"):
         dpg.add_menu_item(label="Metrics", callback=lambda: dpg.show_metrics())
-        dpg.add_menu_item(label="Fonts", callback=lambda: dpg.show_font_manager())
 
 with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="save_window", no_title_bar=True):
     dpg.add_text(source="save_status")
     dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("save_window", show=False))
+
+with dpg.theme() as global_theme:
+    with dpg.theme_component(dpg.mvAll):
+        dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
+        dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
+
+dpg.bind_theme(global_theme)
 
 home_init_file = Path(f"{home_path}/{initfile}")
 init_exist = os.path.exists(home_init_file)
