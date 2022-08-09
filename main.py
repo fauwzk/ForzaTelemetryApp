@@ -49,8 +49,7 @@ with dpg.value_registry():
     dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
 with dpg.font_registry():
-    print(PureWindowsPath("src/font.otf"))
-    font_path = data_gen.resource_path(PureWindowsPath("src/font.otf"))
+    font_path = data_gen.resource_path(str(Path("src/font.otf")))
     print(font_path)
     app_font = dpg.add_font(font_path, 15)
     telemetry_font = dpg.add_font(font_path, 65)
@@ -82,7 +81,7 @@ def connect():
         dpg.configure_item("status_window", show=True)
 
 def save_init_file():
-    init_file = f"{home_path}\\{initfile}"
+    init_file = Path(f"{home_path}/{initfile}")
     dpg.save_init_file(init_file)
     dpg.configure_item("save_window", show=False)
     dpg.set_value("save_status", f"Saved:\n{init_file}")
@@ -193,10 +192,10 @@ def save_values():
             filename = f"{now}-{carperf}.json"
             dpg.configure_item("save_window", show=True)
             dpg.set_value("save_status", f"Saving {filename}")
-            with open(f"{home_path}\\{filename}", "w") as file:
+            with open(Path(f"{home_path}/{filename}"), "w") as file:
                 json.dump(data, file, indent=4)
             dpg.configure_item("save_window", show=False)
-            dpg.set_value("save_status", f"Saved:\n{home_path}\\{filename}")
+            dpg.set_value("save_status", f"Saved:\n{home_path}/{filename}")
             dpg.configure_item("save_window", show=True)
         except Exception as e:
             dpg.set_value("error", e)
@@ -343,7 +342,8 @@ with dpg.theme() as global_theme:
 dpg.bind_theme(global_theme)
 console = Console()
 
-home_init_file = f"{home_path}\\{initfile}"
+home_init_file = Path(f"{home_path}\\{initfile}")
+
 init_exist = os.path.exists(home_init_file)
 if init_exist == False:
     text = Text("Copying defaut init file to home folder")
