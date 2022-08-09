@@ -323,12 +323,12 @@ with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="
     dpg.add_text(source="save_status")
     dpg.add_button(label="Close", width=75, callback=lambda: dpg.configure_item("save_window", show=False))
 
-with dpg.theme() as global_theme:
-    with dpg.theme_component(dpg.mvAll):
-        dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
-        dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
+# with dpg.theme() as global_theme:
+#     with dpg.theme_component(dpg.mvAll):
+#         dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 5, category=dpg.mvThemeCat_Core)
+#         dpg.add_theme_style(dpg.mvStyleVar_GrabRounding, 5, category=dpg.mvThemeCat_Core)
 
-dpg.bind_theme(global_theme)
+# dpg.bind_theme(global_theme)
 
 home_init_file = Path(f"{home_path}/{initfile}")
 init_exist = os.path.exists(home_init_file)
