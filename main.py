@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of 
 
 dpg.create_context()
 
-default_initfile = "src\\default.ini"
+default_initfile = Path("src/default.ini")
 initfile = "fta.ini"
 global home_path
 home_path = os.path.expanduser("~")
@@ -342,7 +342,7 @@ with dpg.theme() as global_theme:
 dpg.bind_theme(global_theme)
 console = Console()
 
-home_init_file = Path(f"{home_path}\\{initfile}")
+home_init_file = Path(f"{home_path}/{initfile}")
 
 init_exist = os.path.exists(home_init_file)
 if init_exist == False:
