@@ -109,31 +109,10 @@ def graph():
                     break
                 else:
                     if power > 0:
-                        if power_axis:
-                            power_high = power_axis[-1]
-                            if power:
-                                # if power:
-                                torque_high = torque_axis[-1]
-                                if torque:
-                                    # if torque:
-                                    rpm_high = rpm_axis[-1]
-                                    # if rpm > int(rpm_high):
-                                    if rpm > int(rpm_high):
-                                        rpm_axis.append(rpm)
-                                        power_axis.append(power)
-                                        torque_axis.append(torque)
-                                        boost_axis.append(boost * 10)
-                                    else:
-                                        continue
-                                else:
-                                    continue
-                            else:
-                                continue
-                        else:
-                            rpm_axis.append(rpm)
-                            power_axis.append(power)
-                            torque_axis.append(torque)
-                            boost_axis.append(boost * 10)
+                        rpm_axis.append(rpm)
+                        power_axis.append(power)
+                        torque_axis.append(torque)
+                        boost_axis.append(boost * 10)
                     else:
                         continue
             dpg.set_value("run_status", "Peak ploting")
