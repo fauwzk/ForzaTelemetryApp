@@ -173,7 +173,6 @@ def save_values():
     if connection_status != 0:
         try:
             data = {}
-            data["version"] = json_version
             data["rpm"] = rpm_axis
             data["power"] = power_axis
             data["torque"] = torque_axis
