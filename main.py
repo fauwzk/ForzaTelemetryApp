@@ -14,14 +14,14 @@ import ping3
 import shutil
 from rich.console import Console
 from rich.text import Text
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 
 # Need rewriting with threading
 warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
 
 dpg.create_context()
 
-default_initfile = Path("src/default.ini")
+default_initfile = Path("default.ini")
 initfile = "fta.ini"
 global home_path
 home_path = os.path.expanduser("~")
@@ -49,7 +49,7 @@ with dpg.value_registry():
     dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
 with dpg.font_registry():
-    font_path = data_gen.resource_path(str(Path("src/font.otf")))
+    font_path = str(Path("font.otf"))
     print(font_path)
     app_font = dpg.add_font(font_path, 15)
     telemetry_font = dpg.add_font(font_path, 65)
@@ -349,7 +349,7 @@ if init_exist == False:
     text = Text("Copying defaut init file to home folder")
     text.stylize("bold red")
     console.print(text)
-    shutil.copyfile(data_gen.resource_path(default_initfile), home_init_file)
+    shutil.copyfile(default_initfile, home_init_file)
     init_file = home_init_file
     text = Text("Init file copied")
     text.stylize("italic green")
