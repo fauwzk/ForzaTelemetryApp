@@ -317,6 +317,7 @@ with dpg.viewport_menu_bar():
         dpg.add_menu_item(label="Save", callback=save_init_file)
     with dpg.menu(label="Debug"):
         dpg.add_menu_item(label="Metrics", callback=lambda: dpg.show_metrics())
+        dpg.add_menu_item(label="Fonts", callback=lambda: dpg.show_font_manager())
 
 with dpg.window(label="Save Status", autosize=True, modal=True, show=False, id="save_window", no_title_bar=True):
     dpg.add_text(source="save_status")
