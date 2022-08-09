@@ -42,9 +42,8 @@ with dpg.value_registry():
     dpg.add_int_value(default_value=int(gear_setting_default), tag="gearbox")
 
 with dpg.font_registry():
-    print("font.otf")
-    font_path = data_gen.resource_path("font.otf")
-    print(font_path)
+    font = "font.otf"
+    font_path = data_gen.resource_path(font)
     app_font = dpg.add_font(font_path, 15)
     telemetry_font = dpg.add_font(font_path, 65)
 
@@ -69,7 +68,6 @@ def connect():
         dpg.set_value("run_status", "Not Running")
         connection_status = 1
     except Exception as e:
-        # print(e)
         connection_status = 0
         dpg.set_value("status", f"Error:\n{e}")
         dpg.configure_item("status_window", show=True)
@@ -331,7 +329,6 @@ with dpg.theme() as global_theme:
 
 dpg.bind_theme(global_theme)
 
-print(home_path)
 home_init_file = Path(f"{home_path}/{initfile}")
 init_exist = os.path.exists(home_init_file)
 
