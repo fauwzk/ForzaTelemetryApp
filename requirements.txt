@@ -1,3 +1,0 @@
-dearpygui==1.6.2
-matplotlib==3.5.2
-ping3==4.0.3
