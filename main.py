@@ -6,7 +6,6 @@ from pathlib import Path
 # Need rewriting with threading
 warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
 
-#ceci est un test
 dpg.create_context()
 
 default_initfile = Path("default.ini")
