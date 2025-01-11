@@ -1,4 +1,4 @@
-dearpygui==1.6.2
-matplotlib==3.5.2
-ping3==4.0.3
-rich==12.5.1
+dearpygui==2.0.0
+matplotlib==3.9.2
+ping3==4.0.8
+rich==13.9.4

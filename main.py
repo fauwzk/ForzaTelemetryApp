@@ -6,6 +6,7 @@ from pathlib import Path
 # Need rewriting with threading
 warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
 
+#ceci est un test
 dpg.create_context()
 
 default_initfile = Path("default.ini")
@@ -104,12 +105,9 @@ def graph():
                         if power_axis:
                             power_high = power_axis[-1]
                             if power:
-                                # if power:
                                 torque_high = torque_axis[-1]
                                 if torque:
-                                    # if torque:
                                     rpm_high = rpm_axis[-1]
-                                    # if rpm > int(rpm_high):
                                     if rpm > int(rpm_high):
                                         rpm_axis.append(rpm)
                                         power_axis.append(power)
